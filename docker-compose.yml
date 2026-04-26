@@ -1,21 +1,30 @@
 version: '3.8'
 services:
-  # Redis: Dùng bản alpine cho nhẹ và ổn định
+  # Database chính: MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-tracking
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: tracking_db
+      MYSQL_ROOT_PASSWORD: "1234"  # Mật khẩu root bạn chọn
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Redis: Tính toán địa lý
   redis:
     image: redis:7.0-alpine
     container_name: redis-tracking
     ports:
       - "6379:6379"
 
-  # Zookeeper: Dùng bản của Confluent (rất phổ biến)
+  # Zookeeper & Kafka (Giữ nguyên như bản trước)
   zookeeper:
     image: confluentinc/cp-zookeeper:7.3.0
     container_name: zookeeper-tracking
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
 
-  # Kafka: Dùng bản của Confluent để đồng bộ với Zookeeper
   kafka:
     image: confluentinc/cp-kafka:7.3.0
     container_name: kafka-tracking
@@ -28,3 +37,6 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+volumes:
+  mysql_data:
